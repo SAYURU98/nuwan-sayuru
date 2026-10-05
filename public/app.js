@@ -18,7 +18,7 @@ const Field = (()=>{
   const cam = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
   cam.position.set(0,0,90);
   const pos = new Float32Array(N*3), tgt = new Float32Array(N*3), col = new Float32Array(N*3), seed = new Float32Array(N);
-  const palette = [new THREE.Color('#f4f2ee'),new THREE.Color('#a9a49c'),new THREE.Color('#f2a93b'),new THREE.Color('#6f6a64')];
+  const palette = [new THREE.Color('#dfe6ec'),new THREE.Color('#e8b86b'),new THREE.Color('#2ec4b6'),new THREE.Color('#c8734a')];
   for(let i=0;i<N;i++){ pos[i*3]=(Math.random()-.5)*300; pos[i*3+1]=(Math.random()-.5)*200; pos[i*3+2]=(Math.random()-.5)*200; seed[i]=Math.random(); }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
@@ -36,12 +36,12 @@ const Field = (()=>{
   const pts = new THREE.Points(geo, mat); scene.add(pts);
 
   function colorize(mode){
+    // mostly silver, with teal, gold and copper flecks
     for(let i=0;i<N;i++){
-      const x=tgt[i*3], y=tgt[i*3+1];
-      let t = mode==='text' ? (x+60)/120 : (Math.atan2(y,x)/Math.PI+1)/2;
-      t = Math.min(.999,Math.max(0,t + (seed[i]-.5)*.18));
-      const k=t*3, a=palette[Math.floor(k)], b=palette[Math.min(3,Math.floor(k)+1)], f=k-Math.floor(k);
-      col[i*3]=a.r+(b.r-a.r)*f; col[i*3+1]=a.g+(b.g-a.g)*f; col[i*3+2]=a.b+(b.b-a.b)*f;
+      const r=seed[i]; let c=palette[0];
+      if(r>.6) c=palette[2]; if(r>.8) c=palette[1]; if(r>.95) c=palette[3];
+      const dim=r<.6 ? .45+r*.7 : 1;
+      col[i*3]=c.r*dim; col[i*3+1]=c.g*dim; col[i*3+2]=c.b*dim;
     }
     geo.attributes.color.needsUpdate=true;
   }
@@ -119,7 +119,7 @@ addEventListener('pointermove',e=>{
   const card=e.target.closest&&e.target.closest('.dom'); if(card){const r=card.getBoundingClientRect(),px=(cx-r.left)/r.width,py=(cy-r.top)/r.height;
     card.style.setProperty('--mx',px*100+'%');card.style.setProperty('--my',py*100+'%');card.style.transform=`perspective(900px) rotateX(${(.5-py)*7}deg) rotateY(${(px-.5)*9}deg)`;}
 });
-addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const hn=document.getElementById('heroName'); if(hn&&!reduce){ hn.style.setProperty('--ry',((e.clientX/innerWidth-.5)*14).toFixed(2)+'deg'); hn.style.setProperty('--rx',((.5-e.clientY/innerHeight)*10).toFixed(2)+'deg'); } const sp=document.getElementById('spot'); if(sp){ sp.style.setProperty('--sx',e.clientX+'px'); sp.style.setProperty('--sy',e.clientY+'px'); } },{passive:true});
+addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const hn=document.getElementById('heroName'); if(hn&&!reduce){ hn.style.setProperty('--ry',((e.clientX/innerWidth-.5)*10).toFixed(2)+'deg'); hn.style.setProperty('--rx',((.5-e.clientY/innerHeight)*8).toFixed(2)+'deg'); hn.querySelectorAll('.l').forEach(l=>{ const r=l.getBoundingClientRect(), d=Math.hypot(e.clientX-(r.left+r.width/2),e.clientY-(r.top+r.height/2)); l.style.setProperty('--lift',(d<220?-(1-d/220)*18:0).toFixed(1)+'px'); }); } const sp=document.getElementById('spot'); if(sp){ sp.style.setProperty('--sx',e.clientX+'px'); sp.style.setProperty('--sy',e.clientY+'px'); } },{passive:true});
 document.addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.dom'); if(c&&!c.contains(e.relatedTarget)) c.style.transform='';});
 
 /* Route transition: a packet is routed hop by hop across a mesh, then the new page loads at its destination */
@@ -149,27 +149,27 @@ const Route=(()=>{
     const at=t=>{let d=t*total;for(let i=0;i<segLen.length;i++){if(d<=segLen[i]){const a=nodes[p[i]],b=nodes[p[i+1]],f=d/segLen[i];return [a.x+(b.x-a.x)*f,a.y+(b.y-a.y)*f,i];}d-=segLen[i];}const z=nodes[p[p.length-1]];return [z.x,z.y,segLen.length];};
     const clouds=Array.from({length:W<700?5:9},()=>({x:Math.random()*W,y:Math.random()*H,s:40+Math.random()*90,v:(Math.random()*.4+.15)*(Math.random()<.5?-1:1),a:.05+Math.random()*.08}));
     const cloudShape=(cx,cy,s)=>{x.beginPath();x.arc(cx-s*.45,cy+s*.08,s*.32,0,7);x.arc(cx-s*.1,cy-s*.18,s*.42,0,7);x.arc(cx+s*.35,cy-s*.02,s*.34,0,7);x.arc(cx+s*.05,cy+s*.16,s*.36,0,7);};
-    const grad=x.createLinearGradient(0,0,W,0); grad.addColorStop(0,'#f4f2ee'); grad.addColorStop(.6,'#f2a93b'); grad.addColorStop(1,'#f2a93b');
+    const grad=x.createLinearGradient(0,0,W,0); grad.addColorStop(0,'#f4f2ee'); grad.addColorStop(.6,'#e8b86b'); grad.addColorStop(1,'#e8b86b');
     function frame(now){
       const k=Math.min(1,(now-t0)/dur), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
       x.clearRect(0,0,W,H); x.fillStyle='rgba(0,0,0,.82)'; x.fillRect(0,0,W,H);
-      clouds.forEach(c=>{ const cx=c.x+c.v*(now-t0)*.06; const g=x.createRadialGradient(cx,c.y,0,cx,c.y,c.s); g.addColorStop(0,`rgba(190,186,200,${c.a*.8})`); g.addColorStop(1,'rgba(190,186,200,0)'); x.fillStyle=g; cloudShape(cx,c.y,c.s); x.fill(); });
+      clouds.forEach(c=>{ const cx=c.x+c.v*(now-t0)*.06; const g=x.createRadialGradient(cx,c.y,0,cx,c.y,c.s); g.addColorStop(0,`rgba(46,196,182,${c.a})`); g.addColorStop(1,'rgba(46,196,182,0)'); x.fillStyle=g; cloudShape(cx,c.y,c.s); x.fill(); });
       x.lineWidth=1; x.strokeStyle='rgba(255,244,234,.10)'; x.beginPath(); edges.forEach(([a,b])=>{x.moveTo(nodes[a].x,nodes[a].y);x.lineTo(nodes[b].x,nodes[b].y)}); x.stroke();
       const [px,py,seg]=at(e);
-      x.lineWidth=2.5; x.strokeStyle=grad; x.shadowColor='#f2a93b'; x.shadowBlur=14; x.beginPath(); x.moveTo(nodes[p[0]].x,nodes[p[0]].y);
+      x.lineWidth=2.5; x.strokeStyle=grad; x.shadowColor='#e8b86b'; x.shadowBlur=14; x.beginPath(); x.moveTo(nodes[p[0]].x,nodes[p[0]].y);
       for(let i=1;i<=seg&&i<p.length;i++) x.lineTo(nodes[p[i]].x,nodes[p[i]].y); x.lineTo(px,py); x.stroke(); x.shadowBlur=0;
-      nodes.forEach((n,i)=>{const hit=p.indexOf(i); const lit=hit>-1&&hit<=seg; x.fillStyle=lit?'#f2a93b':'rgba(244,242,238,.3)'; x.beginPath(); x.arc(n.x,n.y,lit?4:2.2,0,7); x.fill();
-        if(lit&&hit===seg){x.strokeStyle='rgba(242,169,59,.6)';x.beginPath();x.arc(n.x,n.y,10,0,7);x.stroke();}});
-      for(let q=1;q<=3;q++){ const [qx,qy]=at(Math.max(0,e-q*.045)); x.fillStyle=`rgba(242,169,59,${.55-q*.15})`; x.beginPath(); x.arc(qx,qy,4-q*.7,0,7); x.fill(); }
-      x.fillStyle='#fff'; x.shadowColor='#f2a93b'; x.shadowBlur=24; x.beginPath(); x.arc(px,py,5,0,7); x.fill(); x.shadowBlur=0;
+      nodes.forEach((n,i)=>{const hit=p.indexOf(i); const lit=hit>-1&&hit<=seg; x.fillStyle=lit?'#e8b86b':'rgba(244,242,238,.3)'; x.beginPath(); x.arc(n.x,n.y,lit?4:2.2,0,7); x.fill();
+        if(lit&&hit===seg){x.strokeStyle='rgba(232,184,107,.6)';x.beginPath();x.arc(n.x,n.y,10,0,7);x.stroke();}});
+      for(let q=1;q<=3;q++){ const [qx,qy]=at(Math.max(0,e-q*.045)); x.fillStyle=`rgba(232,184,107,${.55-q*.15})`; x.beginPath(); x.arc(qx,qy,4-q*.7,0,7); x.fill(); }
+      x.fillStyle='#fff'; x.shadowColor='#e8b86b'; x.shadowBlur=24; x.beginPath(); x.arc(px,py,5,0,7); x.fill(); x.shadowBlur=0;
       const a0=nodes[p[0]], z0=nodes[p[p.length-1]];
-      x.strokeStyle='#f4f2ee'; x.lineWidth=1.6; x.strokeRect(a0.x-9,a0.y-7,18,14); x.fillStyle='#f2a93b'; x.fillRect(a0.x-5,a0.y-2,3,4); x.fillRect(a0.x+1,a0.y-2,3,4);
-      x.save(); x.shadowColor='#f2a93b'; x.shadowBlur=22+18*e; x.strokeStyle='#f4f2ee'; x.lineWidth=2.2; cloudShape(z0.x,z0.y-4,26+6*e); x.stroke(); x.restore();
+      x.strokeStyle='#f4f2ee'; x.lineWidth=1.6; x.strokeRect(a0.x-9,a0.y-7,18,14); x.fillStyle='#e8b86b'; x.fillRect(a0.x-5,a0.y-2,3,4); x.fillRect(a0.x+1,a0.y-2,3,4);
+      x.save(); x.shadowColor='#2ec4b6'; x.shadowBlur=22+18*e; x.strokeStyle='#a9efe7'; x.lineWidth=2.2; cloudShape(z0.x,z0.y-4,26+6*e); x.stroke(); x.restore();
       x.font='600 11px "JetBrains Mono",monospace'; x.fillStyle='rgba(255,244,234,.7)'; x.fillText('edge',a0.x-14,a0.y+24); x.fillText('cloud',z0.x-16,z0.y+30);
       if(k>=1&&!swapped){ swapped=true; swap();
         const z=nodes[p[p.length-1]], r0=performance.now();
         (function ring(n){const q=Math.min(1,(n-r0)/420); x.clearRect(0,0,W,H); x.fillStyle=`rgba(0,0,0,${.82*(1-q)})`; x.fillRect(0,0,W,H);
-          x.strokeStyle=`rgba(242,169,59,${1-q})`; x.lineWidth=3; x.beginPath(); x.arc(z.x,z.y,q*Math.hypot(W,H),0,7); x.stroke();
+          x.strokeStyle=`rgba(232,184,107,${1-q})`; x.lineWidth=3; x.beginPath(); x.arc(z.x,z.y,q*Math.hypot(W,H),0,7); x.stroke();
           if(q<1) requestAnimationFrame(ring); else { cv.classList.remove('on'); tag.classList.remove('on'); x.clearRect(0,0,W,H); } })(r0);
         return; }
       requestAnimationFrame(frame);
@@ -223,7 +223,7 @@ async function loadRepos(){
 }
 const NAMES={'SSS_Project_God-s-EYE':"God's Eye: malware detection",'God-s-EYE':"God's Eye: phishing detector",'securepy':'SecurePy','Multi-Factor-Authentication-Report':'Multi-factor authentication report','TeamsProWeb':'TeamsPro Web','PishCatcher':'PishCatcher'};
 const pretty = n => NAMES[n] || n.replace(/[-_]/g,' ');
-const langColor = l => ({'JavaScript':'#f2a93b','Python':'#cfcac2','Jupyter Notebook':'#e0703a','HTML':'#8f8a84'})[l]||'#8f8a84';
+const langColor = l => ({'JavaScript':'#e8b86b','Python':'#cfcac2','Jupyter Notebook':'#e0703a','HTML':'#8f8a84'})[l]||'#8f8a84';
 
 const Nav = {
   props:['route'],
@@ -258,17 +258,20 @@ const Home = {
   template:`<div>
   <section class="hero">
     <div class="horizon" aria-hidden="true"><i></i><b></b></div>
-    <div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div class="wrap">
       <div class="hudline" aria-hidden="true"><span>Network · Data centre · Storage · Security</span><span>06.93° N · 79.86° E · Colombo</span></div>
-      <h1 class="name" aria-label="Nuwan Sayuru" id="heroName"><span class="row" v-for="(w,wi) in ['NUWAN','SAYURU']" :key="w" :class="'r'+wi" aria-hidden="true"><span class="l" v-for="(ch,ci) in w" :key="ci" :data-c="ch" :style="{'--d':(0.25+(wi*5+ci)*0.07).toFixed(3)+'s'}"><b class="f">{{ch}}</b></span></span><i class="scan" aria-hidden="true"></i><i class="signal" aria-hidden="true"></i></h1>
-      <p class="lead">{{c.role}}. <b class="shimmer">{{c.intro}}</b></p>
-      <div class="avail" aria-label="Availability">
-        <span v-for="h in c.hud" :key="h.t"><i :style="{background:h.c,boxShadow:'0 0 10px '+h.c}"></i>{{h.t}}</span>
-      </div>
-      <div class="row">
-        <a class="btn hot" href="#work" @click="$root.go('work',$event)">See my work</a>
-        <a class="btn line" href="#contact" @click="$root.go('contact',$event)">Start a conversation</a>
+      <h1 class="name" aria-label="Nuwan Sayuru" id="heroName"><span class="row" v-for="(w,wi) in ['NUWAN','SAYURU']" :key="w" :class="'r'+wi" aria-hidden="true"><span class="l" v-for="(ch,ci) in w" :key="ci" :data-c="ch" :style="{'--d':(0.25+(wi*5+ci)*0.07).toFixed(3)+'s'}"><b class="f">{{ch}}</b></span></span><i class="signal" aria-hidden="true"></i></h1>
+      <div class="hero-foot">
+        <p class="lead">{{c.role}}. <b class="shimmer">{{c.intro}}</b></p>
+        <div>
+          <div class="avail" aria-label="Availability">
+            <span v-for="h in c.hud" :key="h.t"><i :style="{background:h.c,boxShadow:'0 0 10px '+h.c}"></i>{{h.t}}</span>
+          </div>
+          <div class="row">
+            <a class="btn hot" href="#work" @click="$root.go('work',$event)">See my work</a>
+            <a class="btn line" href="#contact" @click="$root.go('contact',$event)">Start a conversation</a>
+          </div>
+        </div>
       </div>
       <p class="hint">Click the particles. Press <kbd>~</kbd> for a terminal.</p>
     </div>
