@@ -403,12 +403,12 @@ const Field = (()=>{
   geo.setAttribute('seed', new THREE.BufferAttribute(seed,1));
   const mat = new THREE.ShaderMaterial({
     transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, vertexColors:true,
-    uniforms:{uTime:{value:0}, uSize:{value: small?2.6:2.2}, uPR:{value:renderer.getPixelRatio()}},
+    uniforms:{uTime:{value:0}, uSize:{value: small?3.4:3.0}, uPR:{value:renderer.getPixelRatio()}},
     vertexShader:`attribute float seed; varying vec3 vC; varying float vA; uniform float uTime,uSize,uPR;
       void main(){ vC=color; vec4 mv=modelViewMatrix*vec4(position,1.); gl_Position=projectionMatrix*mv;
       float tw=.65+.35*sin(uTime*2.+seed*40.); vA=tw; gl_PointSize=uSize*uPR*(70./-mv.z)*(.7+seed*.8); }`,
     fragmentShader:`varying vec3 vC; varying float vA; void main(){ vec2 p=gl_PointCoord-.5; float d=length(p); if(d>.5) discard;
-      float g=smoothstep(.5,0.,d); gl_FragColor=vec4(vC*1.5, g*g*vA); }`
+      float g=smoothstep(.5,0.,d); gl_FragColor=vec4(vC*2.1, min(1.,g*1.15)*vA); }`
   });
   const pts = new THREE.Points(geo, mat); scene.add(pts);
 
