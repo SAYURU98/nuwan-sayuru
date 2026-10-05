@@ -125,6 +125,32 @@ p{margin:0}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
 .tags span{font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--text);background:#ffffff08}
 
+/* stack map */
+.stack{display:grid;gap:14px;margin-top:30px}
+.layer{display:grid;grid-template-columns:minmax(0,230px) minmax(0,1fr);gap:16px 28px;padding:22px 0;border-top:1px solid var(--line);position:relative}
+.layer::before{content:"";position:absolute;left:0;top:-1px;width:120px;height:1px;background:var(--c1);box-shadow:0 0 14px var(--c1)}
+.lh{display:flex;flex-direction:column;gap:6px;align-self:start;position:sticky;top:90px}
+.lh .ln{font-family:var(--f-mono);font-size:12px;color:var(--c1)}
+.lh h3{overflow-wrap:anywhere;font-size:clamp(22px,2.3vw,30px);font-weight:850;font-variation-settings:"wdth" 115;text-transform:uppercase;line-height:1}
+.lh .lc{font-size:13px;color:var(--dim)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px}
+.dom.sm{min-height:0;padding:20px 18px}
+.dom.sm .topo{width:72px;height:48px;right:10px;top:10px;opacity:.75}
+.dom.sm h4{font-family:var(--f-body);font-size:18px;font-weight:700;line-height:1.2;max-width:calc(100% - 70px)}
+.dom.sm p{font-size:14.5px;margin-top:8px;max-width:none}
+.dom.sm .tags{margin-top:12px}
+.dom.sm .tags span{font-size:12px;padding:3px 9px}
+@media (max-width:760px){.layer{grid-template-columns:1fr}.lh{position:static;flex-direction:row;align-items:baseline;gap:12px}}
+@media (max-width:560px){
+  .tiles{grid-template-columns:1fr 1fr;gap:8px}
+  .dom.sm{padding:14px 12px}
+  .dom.sm .topo,.dom.sm p{display:none}
+  .dom.sm h4{max-width:none;font-size:15.5px}
+  .dom.sm .tags{margin-top:8px;gap:4px}
+  .dom.sm .tags span{font-size:11px;padding:2px 7px}
+  .dom.sm .tags span:nth-child(n+3){display:none}
+}
+
 /* marquee */
 .marq{overflow:hidden;border-block:1px solid var(--line);padding-block:18px;margin-top:clamp(56px,8vw,112px);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
 .marq div{display:flex;gap:48px;width:max-content;animation:slide 40s linear infinite}

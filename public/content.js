@@ -44,13 +44,33 @@ window.CONTENT_DEFAULT = {
     {t:"Maintenance support", d:"Upgrades, patches, part replacements and health checks under change control."},
     {t:"Documentation", d:"LLDs, RFCs, MOPs, SoWs, UAT plans and RCA reports."}
   ],
-  domains: [
-    {t:"Data centre", c:["#e8b86b","#f3d7a4"], d:"Virtualisation, disaster recovery and backup on Huawei DCS, including live migration from legacy and physical workloads.", k:["FusionCompute","eDME","UltraVR","eBackup","FusionCube"]},
-    {t:"Storage", c:["#2ec4b6","#a9efe7"], d:"SAN and NAS, all-flash arrays, distributed object storage and immutable backup appliances.", k:["OceanStor Dorado","OceanStor Pacific","OceanProtect","SAN / NAS"]},
-    {t:"SD-WAN and CloudCampus", c:["#c8734a","#e8b86b"], d:"Routers, switches, WLAN, firewalls and WAN acceleration, managed from one controller.", k:["iMaster NCE-Campus","AR routers","CloudEngine","AirEngine","HiSecEngine"]},
-    {t:"GPON", c:["#e8b86b","#2ec4b6"], d:"Passive optical LAN from OLT to ONT, monitored centrally.", k:["OLT","ONT","eSight"]},
-    {t:"Collaboration", c:["#2ec4b6","#c8734a"], d:"Meeting rooms and classrooms on Huawei collaboration platforms.", k:["IdeaHub","Smart Classroom","SMC"]},
-    {t:"Surveillance", c:["#c8734a","#f3d7a4"], d:"Video surveillance for ports, logistics, and oil and gas sites.", k:["IVS3800"]}
+  stack: [
+    {g:"Datacom", c:"#2ec4b6", items:[
+      {t:"Switching", d:"Campus and data-centre switching: stacking, M-LAG and VLAN design.", k:["CloudEngine S5735","S7700","CE6881","M-LAG"]},
+      {t:"Routing", d:"Head-office and branch routing at the WAN edge.", k:["AR6710","AR651","BGP","OSPF","VRRP"]},
+      {t:"SD-WAN", d:"Branches on MPLS and Internet at once, steered by application.", k:["EVPN","IPSec","ZTP","SLA probes"]},
+      {t:"WLAN", d:"Wi-Fi for universities, banks and resorts, 5 to 300 APs a site.", k:["AirEngine","802.1X","Portal","CampusInsight"]},
+      {t:"Network management", d:"Controllers that provision, monitor and recover the estate.", k:["iMaster NCE-Campus","eSight"]}
+    ]},
+    {g:"Security", c:"#c8734a", items:[
+      {t:"Firewalls", d:"Next-generation firewalls at campus and branch edges.", k:["HiSecEngine USG","AV / IPS","URL filtering"]},
+      {t:"Access control", d:"Who joins the network, and what they can reach.", k:["802.1X","MAC auth","RADIUS","ACL"]}
+    ]},
+    {g:"Data centre", c:"#e8b86b", items:[
+      {t:"Virtualisation", d:"Private cloud on DCS, with live migration from legacy and physical servers.", k:["FusionCompute","eDME","MigrationDirector"]},
+      {t:"Hyperconverged", d:"Compute and storage in one platform, upgraded in place.", k:["FusionCube"]},
+      {t:"Disaster recovery", d:"Second sites proven before anyone needs them.", k:["UltraVR","HyperReplication"]}
+    ]},
+    {g:"Storage", c:"#a9efe7", items:[
+      {t:"Enterprise storage", d:"All-flash and hybrid SAN and NAS for core systems.", k:["OceanStor Dorado","FC","iSCSI","NFS"]},
+      {t:"Scale-out storage", d:"Distributed object, file and big-data storage at petabyte scale.", k:["OceanStor Pacific","S3","HDFS"]},
+      {t:"Backup and immutability", d:"Copies that ransomware cannot delete.", k:["OceanProtect","eBackup","WORM"]}
+    ]},
+    {g:"Access and media", c:"#f3d7a4", items:[
+      {t:"GPON", d:"Passive optical LAN from OLT to ONT.", k:["OLT","ONT","eSight"]},
+      {t:"Collaboration", d:"Meeting rooms and smart classrooms.", k:["IdeaHub","Smart Classroom","SMC"]},
+      {t:"Surveillance", d:"Video for ports, logistics, and oil and gas sites.", k:["IVS3800"]}
+    ]}
   ],
   highlights: [
     {n:"1st", t:"First Huawei SD-WAN in Sri Lanka", s:"Financial sector, ISP-managed model, 62 to 250+ branches", b:"Migrated MPLS branches to multi-link SD-WAN with zero-touch provisioning, SLA probes, application-based routing, QoS, IPSec, dual-gateway HA, BGP EVPN, VRRP, and AV/IPS firewalling. Failover got faster and new branches became simpler to bring online."},

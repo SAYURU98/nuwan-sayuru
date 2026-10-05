@@ -259,7 +259,7 @@ const Home = {
   <section class="hero">
     <div class="horizon" aria-hidden="true"><i></i><b></b></div>
     <div class="wrap">
-      <div class="hudline" aria-hidden="true"><span>Network · Data centre · Storage · Security</span><span>06.93° N · 79.86° E · Colombo</span></div>
+      <div class="hudline" aria-hidden="true"><span>Datacom · Security · Data centre · Storage · GPON · Video</span><span>06.93° N · 79.86° E · Colombo</span></div>
       <h1 class="name" aria-label="Nuwan Sayuru" id="heroName"><span class="row" v-for="(w,wi) in ['NUWAN','SAYURU']" :key="w" :class="'r'+wi" aria-hidden="true"><span class="l" v-for="(ch,ci) in w" :key="ci" :data-c="ch" :style="{'--d':(0.25+(wi*5+ci)*0.07).toFixed(3)+'s'}"><b class="f">{{ch}}</b></span></span><i class="signal" aria-hidden="true"></i></h1>
       <div class="hero-foot">
         <p class="lead">{{c.role}}. <b class="shimmer">{{c.intro}}</b></p>
@@ -293,10 +293,15 @@ const Home = {
       <a class="go" href="#contact" @click="$root.s.kind=w.kind;$root.go('contact',$event)">{{w.cta}}</a></article></div>
   </section>
   <section class="wrap block">
-    <h2 class="h2" data-scr>Domains</h2>
-    <p>POCs, implementation and support in each of these.</p>
-    <div class="doms"><article class="dom glass" v-for="(d,i) in c.domains" :key="d.t" :style="{'--c1':d.c[0],'--c2':d.c[1]}" tabindex="0">
-      <Topo :i="i"/><h3>{{d.t}}</h3><p>{{d.d}}</p><div class="tags"><span v-for="k in d.k" :key="k">{{k}}</span></div></article></div>
+    <h2 class="h2" data-scr>Across the stack</h2>
+    <p>POCs, implementation and support in every layer below, from the access switch to the backup vault.</p>
+    <div class="stack">
+      <div class="layer" v-for="(g,gi) in c.stack" :key="g.g" :style="{'--c1':g.c,'--c2':g.c}">
+        <div class="lh"><span class="ln">{{String(gi+1).padStart(2,'0')}}</span><h3>{{g.g}}</h3><span class="lc">{{g.items.length}} {{g.items.length===1?'area':'areas'}}</span></div>
+        <div class="tiles"><article class="dom glass sm" v-for="(d,i) in g.items" :key="d.t" tabindex="0">
+          <Topo :i="gi*3+i"/><h4>{{d.t}}</h4><p>{{d.d}}</p><div class="tags"><span v-for="k in d.k" :key="k">{{k}}</span></div></article></div>
+      </div>
+    </div>
   </section>
   <div class="marq" aria-label="Sectors served"><div><span v-for="(s,i) in [...c.sectors,...c.sectors]" :key="i">{{s}}</span></div></div>
   </div>`,
@@ -600,7 +605,7 @@ const Term = {
         help:()=>this.say('whoami  stats  skills  services  github  cv  work  play  endorse  contact  burst  clear'),
         whoami:()=>this.say(`Nuwan Sayuru\n${C.role}\n${C.basedIn}`),
         stats:()=>this.say(C.stats.map(s=>`${s.v.padEnd(6)} ${s.l}`).join('\n')),
-        skills:()=>this.say(C.domains.map(d=>`${d.t}: ${d.k.join(', ')}`).join('\n')),
+        skills:()=>this.say((C.stack||[]).map(g=>`${g.g}: ${g.items.map(i=>i.t).join(', ')}`).join('\n')),
         services:()=>this.say(C.services.map(s=>'- '+s.t).join('\n')),
         github:()=>{window.open?.('https://github.com/'+S.github,'_blank');this.say('github.com/'+S.github);},
         cv:()=>{this.$root.go('contact',null,'cv');this.say('Opening the CV section.');},
