@@ -12,18 +12,18 @@ window.SITE = Object.assign({
 window.CONTENT_DEFAULT = {
   role: "Field Services Engineer, Huawei Technologies Lanka",
   intro: "I implement, prove and support enterprise infrastructure: data centre, storage, SD-WAN, campus networks, GPON, collaboration and surveillance.",
-  basedIn: "Colombo, Sri Lanka. On-site delivery in the Maldives.",
+  basedIn: "Based in Colombo. Implementation, POCs, troubleshooting and after-sales support across Sri Lanka and the Maldives.",
   available: true,
   hud: [
-    {t:"Open to new roles · relocation-ready on one month's notice", c:"#ffb300"},
-    {t:"Solution consulting and freelance", c:"#ff3d1f"},
-    {t:"Open to collaborations", c:"#d62bff"}
+    {t:"Open to new roles · relocation-ready on one month's notice", c:"#f2a93b"},
+    {t:"Solution consulting and freelance", c:"#cfcac2"},
+    {t:"Open to collaborations", c:"#8f8a84"}
   ],
   wwmIntro: "Three ways to work together.",
   wwm: [
-    {t:"Hire me", c:"linear-gradient(90deg,#ffb300,#ff3d1f)", d:"Presales or post-sales engineering in network, data centre and storage. I can relocate and start within one month.", cta:"Discuss a role", kind:"Job opportunity"},
-    {t:"Consulting and freelance", c:"linear-gradient(90deg,#ff3d1f,#d62bff)", d:"Solution design reviews, implementation support, proofs of concept and troubleshooting on enterprise network, storage and data centre platforms.", cta:"Ask about a project", kind:"Consultation"},
-    {t:"Security services", c:"linear-gradient(90deg,#d62bff,#ffb300)", tag:"On request", d:"Network security reviews, firewall and access-control hardening, and vulnerability assessments, drawing on my cyber security degree.", cta:"Start a conversation", kind:"Consultation"}
+    {t:"Hire me", c:"linear-gradient(90deg,#f2a93b,transparent)", d:"Presales or post-sales engineering in network, data centre and storage. I can relocate and start within one month.", cta:"Discuss a role", kind:"Job opportunity"},
+    {t:"Consulting and freelance", c:"linear-gradient(90deg,#f2a93b,transparent)", d:"Solution design reviews, implementation support, proofs of concept and troubleshooting on enterprise network, storage and data centre platforms.", cta:"Ask about a project", kind:"Consultation"},
+    {t:"Security services", c:"linear-gradient(90deg,#f2a93b,transparent)", tag:"On request", d:"Network security reviews, firewall and access-control hardening, and vulnerability assessments, drawing on my cyber security degree.", cta:"Start a conversation", kind:"Consultation"}
   ],
   photo: {url:"", updated:""},
   cv: {url:"/cv", updated:"5 October 2026"},
@@ -45,12 +45,12 @@ window.CONTENT_DEFAULT = {
     {t:"Documentation", d:"LLDs, RFCs, MOPs, SoWs, UAT plans and RCA reports."}
   ],
   domains: [
-    {t:"Data centre", c:["#ffb300","#ff3d1f"], d:"Virtualisation, disaster recovery and backup on Huawei DCS, including live migration from legacy and physical workloads.", k:["FusionCompute","eDME","UltraVR","eBackup","FusionCube"]},
-    {t:"Storage", c:["#d62bff","#ff3d1f"], d:"SAN and NAS, all-flash arrays, distributed object storage and immutable backup appliances.", k:["OceanStor Dorado","OceanStor Pacific","OceanProtect","SAN / NAS"]},
-    {t:"SD-WAN and CloudCampus", c:["#ff3d1f","#d62bff"], d:"Routers, switches, WLAN, firewalls and WAN acceleration, managed from one controller.", k:["iMaster NCE-Campus","AR routers","CloudEngine","AirEngine","HiSecEngine"]},
-    {t:"GPON", c:["#ffb300","#d62bff"], d:"Passive optical LAN from OLT to ONT, monitored centrally.", k:["OLT","ONT","eSight"]},
-    {t:"Collaboration", c:["#ff3d1f","#ffb300"], d:"Meeting rooms and classrooms on Huawei collaboration platforms.", k:["IdeaHub","Smart Classroom","SMC"]},
-    {t:"Surveillance", c:["#d62bff","#ffb300"], d:"Video surveillance for ports, logistics, and oil and gas sites.", k:["IVS3800"]}
+    {t:"Data centre", c:["#f2a93b","#f4f2ee"], d:"Virtualisation, disaster recovery and backup on Huawei DCS, including live migration from legacy and physical workloads.", k:["FusionCompute","eDME","UltraVR","eBackup","FusionCube"]},
+    {t:"Storage", c:["#f2a93b","#f4f2ee"], d:"SAN and NAS, all-flash arrays, distributed object storage and immutable backup appliances.", k:["OceanStor Dorado","OceanStor Pacific","OceanProtect","SAN / NAS"]},
+    {t:"SD-WAN and CloudCampus", c:["#f2a93b","#f4f2ee"], d:"Routers, switches, WLAN, firewalls and WAN acceleration, managed from one controller.", k:["iMaster NCE-Campus","AR routers","CloudEngine","AirEngine","HiSecEngine"]},
+    {t:"GPON", c:["#f2a93b","#f4f2ee"], d:"Passive optical LAN from OLT to ONT, monitored centrally.", k:["OLT","ONT","eSight"]},
+    {t:"Collaboration", c:["#f2a93b","#f4f2ee"], d:"Meeting rooms and classrooms on Huawei collaboration platforms.", k:["IdeaHub","Smart Classroom","SMC"]},
+    {t:"Surveillance", c:["#f2a93b","#f4f2ee"], d:"Video surveillance for ports, logistics, and oil and gas sites.", k:["IVS3800"]}
   ],
   highlights: [
     {n:"1st", t:"First Huawei SD-WAN in Sri Lanka", s:"Financial sector, ISP-managed model, 62 to 250+ branches", b:"Migrated MPLS branches to multi-link SD-WAN with zero-touch provisioning, SLA probes, application-based routing, QoS, IPSec, dual-gateway HA, BGP EVPN, VRRP, and AV/IPS firewalling. Failover got faster and new branches became simpler to bring online."},

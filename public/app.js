@@ -18,7 +18,7 @@ const Field = (()=>{
   const cam = new THREE.PerspectiveCamera(50, 1, 0.1, 400);
   cam.position.set(0,0,90);
   const pos = new Float32Array(N*3), tgt = new Float32Array(N*3), col = new Float32Array(N*3), seed = new Float32Array(N);
-  const palette = [new THREE.Color('#ffb300'),new THREE.Color('#ff3d1f'),new THREE.Color('#d62bff'),new THREE.Color('#7a2bff')];
+  const palette = [new THREE.Color('#f4f2ee'),new THREE.Color('#a9a49c'),new THREE.Color('#f2a93b'),new THREE.Color('#6f6a64')];
   for(let i=0;i<N;i++){ pos[i*3]=(Math.random()-.5)*300; pos[i*3+1]=(Math.random()-.5)*200; pos[i*3+2]=(Math.random()-.5)*200; seed[i]=Math.random(); }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
@@ -31,7 +31,7 @@ const Field = (()=>{
       void main(){ vC=color; vec4 mv=modelViewMatrix*vec4(position,1.); gl_Position=projectionMatrix*mv;
       float tw=.65+.35*sin(uTime*2.+seed*40.); vA=tw; gl_PointSize=uSize*uPR*(70./-mv.z)*(.7+seed*.8); }`,
     fragmentShader:`varying vec3 vC; varying float vA; void main(){ vec2 p=gl_PointCoord-.5; float d=length(p); if(d>.5) discard;
-      float g=smoothstep(.5,0.,d); gl_FragColor=vec4(vC*2.1, min(1.,g*1.15)*vA); }`
+      float g=smoothstep(.5,0.,d); gl_FragColor=vec4(vC*1.25, min(1.,g)*vA*.85); }`
   });
   const pts = new THREE.Points(geo, mat); scene.add(pts);
 
@@ -119,7 +119,7 @@ addEventListener('pointermove',e=>{
   const card=e.target.closest&&e.target.closest('.dom'); if(card){const r=card.getBoundingClientRect(),px=(cx-r.left)/r.width,py=(cy-r.top)/r.height;
     card.style.setProperty('--mx',px*100+'%');card.style.setProperty('--my',py*100+'%');card.style.transform=`perspective(900px) rotateX(${(.5-py)*7}deg) rotateY(${(px-.5)*9}deg)`;}
 });
-addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const sp=document.getElementById('spot'); if(sp){ sp.style.setProperty('--sx',e.clientX+'px'); sp.style.setProperty('--sy',e.clientY+'px'); } },{passive:true});
+addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const hn=document.getElementById('heroName'); if(hn&&!reduce){ hn.style.setProperty('--ry',((e.clientX/innerWidth-.5)*14).toFixed(2)+'deg'); hn.style.setProperty('--rx',((.5-e.clientY/innerHeight)*10).toFixed(2)+'deg'); } const sp=document.getElementById('spot'); if(sp){ sp.style.setProperty('--sx',e.clientX+'px'); sp.style.setProperty('--sy',e.clientY+'px'); } },{passive:true});
 document.addEventListener('pointerout',e=>{const c=e.target.closest&&e.target.closest('.dom'); if(c&&!c.contains(e.relatedTarget)) c.style.transform='';});
 
 /* Route transition: a packet is routed hop by hop across a mesh, then the new page loads at its destination */
@@ -147,21 +147,29 @@ const Route=(()=>{
     const t0=performance.now(), dur=760; let swapped=false;
     const segLen=[]; let total=0; for(let i=1;i<p.length;i++){const a=nodes[p[i-1]],b=nodes[p[i]];const l=Math.hypot(b.x-a.x,b.y-a.y);segLen.push(l);total+=l;}
     const at=t=>{let d=t*total;for(let i=0;i<segLen.length;i++){if(d<=segLen[i]){const a=nodes[p[i]],b=nodes[p[i+1]],f=d/segLen[i];return [a.x+(b.x-a.x)*f,a.y+(b.y-a.y)*f,i];}d-=segLen[i];}const z=nodes[p[p.length-1]];return [z.x,z.y,segLen.length];};
-    const grad=x.createLinearGradient(0,0,W,0); grad.addColorStop(0,'#ffb300'); grad.addColorStop(.5,'#ff3d1f'); grad.addColorStop(1,'#d62bff');
+    const clouds=Array.from({length:W<700?5:9},()=>({x:Math.random()*W,y:Math.random()*H,s:40+Math.random()*90,v:(Math.random()*.4+.15)*(Math.random()<.5?-1:1),a:.05+Math.random()*.08}));
+    const cloudShape=(cx,cy,s)=>{x.beginPath();x.arc(cx-s*.45,cy+s*.08,s*.32,0,7);x.arc(cx-s*.1,cy-s*.18,s*.42,0,7);x.arc(cx+s*.35,cy-s*.02,s*.34,0,7);x.arc(cx+s*.05,cy+s*.16,s*.36,0,7);};
+    const grad=x.createLinearGradient(0,0,W,0); grad.addColorStop(0,'#f4f2ee'); grad.addColorStop(.6,'#f2a93b'); grad.addColorStop(1,'#f2a93b');
     function frame(now){
       const k=Math.min(1,(now-t0)/dur), e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
       x.clearRect(0,0,W,H); x.fillStyle='rgba(0,0,0,.82)'; x.fillRect(0,0,W,H);
+      clouds.forEach(c=>{ const cx=c.x+c.v*(now-t0)*.06; const g=x.createRadialGradient(cx,c.y,0,cx,c.y,c.s); g.addColorStop(0,`rgba(190,186,200,${c.a*.8})`); g.addColorStop(1,'rgba(190,186,200,0)'); x.fillStyle=g; cloudShape(cx,c.y,c.s); x.fill(); });
       x.lineWidth=1; x.strokeStyle='rgba(255,244,234,.10)'; x.beginPath(); edges.forEach(([a,b])=>{x.moveTo(nodes[a].x,nodes[a].y);x.lineTo(nodes[b].x,nodes[b].y)}); x.stroke();
       const [px,py,seg]=at(e);
-      x.lineWidth=2.5; x.strokeStyle=grad; x.shadowColor='#ff3d1f'; x.shadowBlur=14; x.beginPath(); x.moveTo(nodes[p[0]].x,nodes[p[0]].y);
+      x.lineWidth=2.5; x.strokeStyle=grad; x.shadowColor='#f2a93b'; x.shadowBlur=14; x.beginPath(); x.moveTo(nodes[p[0]].x,nodes[p[0]].y);
       for(let i=1;i<=seg&&i<p.length;i++) x.lineTo(nodes[p[i]].x,nodes[p[i]].y); x.lineTo(px,py); x.stroke(); x.shadowBlur=0;
-      nodes.forEach((n,i)=>{const hit=p.indexOf(i); const lit=hit>-1&&hit<=seg; x.fillStyle=lit?'#ffb300':'rgba(255,244,234,.35)'; x.beginPath(); x.arc(n.x,n.y,lit?4:2.2,0,7); x.fill();
-        if(lit&&hit===seg){x.strokeStyle='rgba(255,179,0,.6)';x.beginPath();x.arc(n.x,n.y,10,0,7);x.stroke();}});
-      x.fillStyle='#fff'; x.shadowColor='#ffb300'; x.shadowBlur=24; x.beginPath(); x.arc(px,py,5,0,7); x.fill(); x.shadowBlur=0;
+      nodes.forEach((n,i)=>{const hit=p.indexOf(i); const lit=hit>-1&&hit<=seg; x.fillStyle=lit?'#f2a93b':'rgba(244,242,238,.3)'; x.beginPath(); x.arc(n.x,n.y,lit?4:2.2,0,7); x.fill();
+        if(lit&&hit===seg){x.strokeStyle='rgba(242,169,59,.6)';x.beginPath();x.arc(n.x,n.y,10,0,7);x.stroke();}});
+      for(let q=1;q<=3;q++){ const [qx,qy]=at(Math.max(0,e-q*.045)); x.fillStyle=`rgba(242,169,59,${.55-q*.15})`; x.beginPath(); x.arc(qx,qy,4-q*.7,0,7); x.fill(); }
+      x.fillStyle='#fff'; x.shadowColor='#f2a93b'; x.shadowBlur=24; x.beginPath(); x.arc(px,py,5,0,7); x.fill(); x.shadowBlur=0;
+      const a0=nodes[p[0]], z0=nodes[p[p.length-1]];
+      x.strokeStyle='#f4f2ee'; x.lineWidth=1.6; x.strokeRect(a0.x-9,a0.y-7,18,14); x.fillStyle='#f2a93b'; x.fillRect(a0.x-5,a0.y-2,3,4); x.fillRect(a0.x+1,a0.y-2,3,4);
+      x.save(); x.shadowColor='#f2a93b'; x.shadowBlur=22+18*e; x.strokeStyle='#f4f2ee'; x.lineWidth=2.2; cloudShape(z0.x,z0.y-4,26+6*e); x.stroke(); x.restore();
+      x.font='600 11px "JetBrains Mono",monospace'; x.fillStyle='rgba(255,244,234,.7)'; x.fillText('edge',a0.x-14,a0.y+24); x.fillText('cloud',z0.x-16,z0.y+30);
       if(k>=1&&!swapped){ swapped=true; swap();
         const z=nodes[p[p.length-1]], r0=performance.now();
         (function ring(n){const q=Math.min(1,(n-r0)/420); x.clearRect(0,0,W,H); x.fillStyle=`rgba(0,0,0,${.82*(1-q)})`; x.fillRect(0,0,W,H);
-          x.strokeStyle=`rgba(214,43,255,${1-q})`; x.lineWidth=3; x.beginPath(); x.arc(z.x,z.y,q*Math.hypot(W,H),0,7); x.stroke();
+          x.strokeStyle=`rgba(242,169,59,${1-q})`; x.lineWidth=3; x.beginPath(); x.arc(z.x,z.y,q*Math.hypot(W,H),0,7); x.stroke();
           if(q<1) requestAnimationFrame(ring); else { cv.classList.remove('on'); tag.classList.remove('on'); x.clearRect(0,0,W,H); } })(r0);
         return; }
       requestAnimationFrame(frame);
@@ -215,7 +223,7 @@ async function loadRepos(){
 }
 const NAMES={'SSS_Project_God-s-EYE':"God's Eye: malware detection",'God-s-EYE':"God's Eye: phishing detector",'securepy':'SecurePy','Multi-Factor-Authentication-Report':'Multi-factor authentication report','TeamsProWeb':'TeamsPro Web','PishCatcher':'PishCatcher'};
 const pretty = n => NAMES[n] || n.replace(/[-_]/g,' ');
-const langColor = l => ({'JavaScript':'#ffb300','Python':'#d62bff','Jupyter Notebook':'#ff3d1f','HTML':'#d62bff'})[l]||'#bfaea9';
+const langColor = l => ({'JavaScript':'#f2a93b','Python':'#cfcac2','Jupyter Notebook':'#e0703a','HTML':'#8f8a84'})[l]||'#8f8a84';
 
 const Nav = {
   props:['route'],
@@ -252,7 +260,8 @@ const Home = {
     <div class="horizon" aria-hidden="true"><i></i><b></b></div>
     <div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     <div class="wrap">
-      <h1 class="name" data-ghost="NUWAN\nSAYURU"><span data-scr>Nuwan</span><span data-scr>Sayuru</span></h1>
+      <div class="hudline" aria-hidden="true"><span>Network · Data centre · Storage · Security</span><span>06.93° N · 79.86° E · Colombo</span></div>
+      <h1 class="name" aria-label="Nuwan Sayuru" id="heroName"><span class="row" v-for="(w,wi) in ['NUWAN','SAYURU']" :key="w" :class="'r'+wi" aria-hidden="true"><span class="l" v-for="(ch,ci) in w" :key="ci" :data-c="ch" :style="{'--d':(0.25+(wi*5+ci)*0.07).toFixed(3)+'s'}"><b class="f">{{ch}}</b></span></span><i class="scan" aria-hidden="true"></i><i class="signal" aria-hidden="true"></i></h1>
       <p class="lead">{{c.role}}. <b class="shimmer">{{c.intro}}</b></p>
       <div class="avail" aria-label="Availability">
         <span v-for="h in c.hud" :key="h.t"><i :style="{background:h.c,boxShadow:'0 0 10px '+h.c}"></i>{{h.t}}</span>
@@ -332,71 +341,114 @@ const Code = {
 /* ---------- games ---------- */
 const Subnet = {
   template:`<div class="game glass">
-    <h3 class="grad">Subnet Sprint</h3><p class="rule">60 seconds. Answer as many subnetting questions as you can.</p>
-    <div class="hud"><span>Time <b>{{left}}s</b></span><span>Score <b>{{score}}</b></span><span>Best <b>{{best}}</b></span></div>
-    <template v-if="on"><div class="q">{{q.text}}</div>
-      <div class="opts"><button v-for="o in q.opts" :key="o" type="button" :class="mark(o)" @click="pick(o)">{{o}}</button></div></template>
-    <div v-else style="display:grid;gap:12px"><p v-if="played" class="done">Time. You scored {{score}}.</p><button class="btn hot" type="button" @click="start" style="justify-self:start">{{played?'Play again':'Start'}}</button></div>
+    <div class="ghead"><h3 class="grad">Subnet Sprint</h3>
+      <div class="seg mini-seg" role="group" aria-label="Difficulty"><button type="button" v-for="d in ['Easy','Pro']" :key="d" :aria-pressed="mode===d" :disabled="on" @click="mode=d">{{d}}</button></div></div>
+    <p class="rule">60 seconds of subnetting. Streaks multiply your score. Easy uses /24 to /30, Pro uses /8 to /30.</p>
+    <div class="hud"><span>Time <b>{{left}}s</b></span><span>Score <b>{{score}}</b></span><span>Streak <b>×{{mult}}</b></span><span>Best <b>{{best[mode]||0}}</b></span></div>
+    <div class="tbar" aria-hidden="true"><i :style="{transform:'scaleX('+(left/60)+')'}"></i></div>
+    <template v-if="on">
+      <div class="q" :class="{flash:flash}">{{q.text}}</div>
+      <div class="opts"><button v-for="(o,k) in q.opts" :key="o" type="button" :class="mark(o)" @click="pick(o)"><kbd>{{k+1}}</kbd> {{o}}</button></div>
+      <p class="tip" v-if="tip" aria-live="polite">{{tip}}</p>
+    </template>
+    <div v-else class="idle"><p v-if="played" class="done">Time. {{score}} points, {{right}} of {{asked}} correct{{newBest?' · new best':''}}.</p><p v-else class="rule">Keys 1 to 4 answer. Hints cost 3 seconds.</p></div>
+    <div class="gctl">
+      <button class="btn hot" type="button" @click="start">{{on?'Restart':played?'Play again':'Start'}}</button>
+      <button class="btn line" type="button" :disabled="!on||!!chosen" @click="hint">Hint</button>
+      <button class="btn line" type="button" @click="reset">Reset</button>
+    </div>
   </div>`,
-  data(){return{on:false,played:false,left:60,score:0,best:store.get('ns-subnet-best',0),q:{},chosen:null,timer:null}},
+  data(){return{on:false,played:false,mode:'Easy',left:60,score:0,streak:0,right:0,asked:0,best:store.get('ns-subnet-best2',{}),q:{},chosen:null,timer:null,tip:'',flash:false,newBest:false}},
+  computed:{mult(){return Math.min(4,1+Math.floor(this.streak/3))}},
   methods:{
     ip2s(n){return[(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.')},
-    gen(){const p=8+Math.floor(Math.random()*23), ip=(Math.floor(Math.random()*223)+1)*16777216+Math.floor(Math.random()*16777216), mask=p===0?0:(0xFFFFFFFF<<(32-p))>>>0;
-      const net=(ip&mask)>>>0, bc=(net|(~mask>>>0))>>>0, hosts=p>=31?(p===31?2:1):Math.pow(2,32-p)-2;
-      const kinds=['net','bc','hosts','mask'], k=kinds[Math.floor(Math.random()*4)]; let ans, text, wrong=new Set();
-      const cidr=`${this.ip2s(ip)}/${p}`;
-      if(k==='net'){ans=this.ip2s(net);text=`Network address of ${cidr}?`; [net+256,net-256,(net^(1<<(32-p)))>>>0,ip>>>0].forEach(v=>wrong.add(this.ip2s(v>>>0)));}
-      if(k==='bc'){ans=this.ip2s(bc);text=`Broadcast address of ${cidr}?`; [bc-1,bc+1,net,(bc^(1<<(32-p)))>>>0].forEach(v=>wrong.add(this.ip2s(v>>>0)));}
-      if(k==='hosts'){ans=hosts.toLocaleString();text=`Usable hosts in a /${p}?`; [hosts+2,Math.pow(2,32-p),Math.max(1,hosts/2-1),hosts*2+2].forEach(v=>wrong.add(Math.round(v).toLocaleString()));}
-      if(k==='mask'){ans=this.ip2s(mask);text=`Subnet mask for /${p}?`; [p-1,p+1,p+8>32?p-8:p+8].forEach(x=>{x=Math.min(32,Math.max(1,x));wrong.add(this.ip2s((0xFFFFFFFF<<(32-x))>>>0));});}
-      wrong.delete(ans); const opts=[ans,...[...wrong].slice(0,3)].sort(()=>Math.random()-.5); this.q={text,ans,opts}; this.chosen=null;},
-    start(){this.on=true;this.played=true;this.score=0;this.left=60;this.gen();clearInterval(this.timer);this.timer=setInterval(()=>{this.left--;if(this.left<=0){clearInterval(this.timer);this.on=false;if(this.score>this.best){this.best=this.score;store.set('ns-subnet-best',this.score);}}},1000);},
-    pick(o){if(this.chosen)return;this.chosen=o;if(o===this.q.ans)this.score++;setTimeout(()=>this.on&&this.gen(),o===this.q.ans?260:700);},
-    mark(o){if(!this.chosen)return'';if(o===this.q.ans)return'right';if(o===this.chosen)return'wrong';return''}
+    gen(){const lo=this.mode==='Easy'?24:8, p=lo+Math.floor(Math.random()*(31-lo)), oct=[10,172,192,100][Math.floor(Math.random()*4)];
+      const ip=((oct*16777216)+Math.floor(Math.random()*16777216))>>>0, mask=(0xFFFFFFFF<<(32-p))>>>0, size=Math.pow(2,32-p);
+      const net=(ip&mask)>>>0, bc=(net+size-1)>>>0, hosts=size-2, cidr=`${this.ip2s(ip)}/${p}`;
+      const kinds=['net','bc','hosts','mask','first','last'], k=kinds[Math.floor(Math.random()*kinds.length)]; let ans,text,hint,wrong=new Set();
+      const bump=v=>this.ip2s((v>>>0));
+      if(k==='net'){ans=this.ip2s(net);text=`Network address of ${cidr}?`;[net+size,net-size,net+1,ip].forEach(v=>wrong.add(bump(v)));}
+      if(k==='bc'){ans=this.ip2s(bc);text=`Broadcast address of ${cidr}?`;[bc-1,bc+size,net,bc-size].forEach(v=>wrong.add(bump(v)));}
+      if(k==='first'){ans=this.ip2s(net+1);text=`First usable host in ${cidr}?`;[net,net+2,bc-1,net+size+1].forEach(v=>wrong.add(bump(v)));}
+      if(k==='last'){ans=this.ip2s(bc-1);text=`Last usable host in ${cidr}?`;[bc,bc-2,net+1,bc-size-1].forEach(v=>wrong.add(bump(v)));}
+      if(k==='hosts'){ans=hosts.toLocaleString();text=`Usable hosts in a /${p}?`;[size,hosts+2,Math.max(2,size/2-2),size*2-2].forEach(v=>wrong.add(Math.round(v).toLocaleString()));}
+      if(k==='mask'){ans=this.ip2s(mask);text=`Subnet mask for /${p}?`;[p-1,p+1,p-2,p+2].forEach(x=>{x=Math.min(32,Math.max(1,x));wrong.add(this.ip2s((0xFFFFFFFF<<(32-x))>>>0));});}
+      const octIdx=Math.floor((p-1)/8), blk=Math.pow(2,(8-(p%8))%8||8);
+      hint = k==='hosts'||k==='mask' ? `A /${p} leaves ${32-p} host bits: 2^${32-p} = ${size.toLocaleString()} addresses${k==='hosts'?', minus network and broadcast':''}.`
+        : `Block size is ${size.toLocaleString()} addresses. In octet ${octIdx+1}, round down to a multiple of ${blk} for the network${k==='net'?'':', then step from there'}.`;
+      wrong.delete(ans); const opts=[ans,...[...wrong].slice(0,3)].sort(()=>Math.random()-.5); this.q={text,ans,opts,hint}; this.chosen=null; this.tip=''; this.asked++;},
+    start(){this.reset(true);this.on=true;this.played=true;this.gen();this.timer=setInterval(()=>{this.left--;if(this.left<=0) this.end();},1000);},
+    end(){clearInterval(this.timer);this.on=false;this.left=0;this.newBest=false;if(this.score>(this.best[this.mode]||0)){this.best={...this.best,[this.mode]:this.score};store.set('ns-subnet-best2',this.best);this.newBest=true;}},
+    reset(keep){clearInterval(this.timer);this.on=false;this.left=60;this.score=0;this.streak=0;this.right=0;this.asked=0;this.chosen=null;this.tip='';if(!keep)this.played=false;},
+    hint(){if(!this.on||this.tip)return;this.tip=this.q.hint;this.left=Math.max(1,this.left-3);},
+    pick(o){if(this.chosen||!this.on)return;this.chosen=o;const ok=o===this.q.ans;
+      if(ok){this.streak++;this.right++;this.score+=this.tip?this.mult:2*this.mult;}else{this.streak=0;this.flash=true;setTimeout(()=>this.flash=false,350);}
+      setTimeout(()=>this.on&&this.gen(),ok?280:900);},
+    mark(o){if(!this.chosen)return'';if(o===this.q.ans)return'right';if(o===this.chosen)return'wrong';return''},
+    key(e){if(!this.on||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;const n=+e.key;if(n>=1&&n<=4&&this.q.opts[n-1])this.pick(this.q.opts[n-1]);if(e.key==='h')this.hint();}
   },
-  unmounted(){clearInterval(this.timer)}
+  mounted(){this._k=e=>this.key(e);addEventListener('keydown',this._k)},
+  unmounted(){clearInterval(this.timer);removeEventListener('keydown',this._k)}
 };
 const LinkUp = {
   template:`<div class="game glass">
-    <h3 class="grad">Link Up</h3><p class="rule">Rotate the tiles to bring the link up from the left port to the right port.</p>
-    <div class="hud"><span>Level <b>{{level}}</b></span><span>Moves <b>{{moves}}</b></span></div>
-    <div class="board" :style="{gridTemplateColumns:'repeat('+n+',1fr)'}">
-      <button v-for="(t,i) in tiles" :key="i" type="button" class="tile" :class="{lit:lit.has(i),end:i===src||i===dst}" :aria-label="'Tile '+(i+1)" @click="rot(i)">
-        <svg viewBox="0 0 40 40" :style="{transform:'rotate('+t.r*90+'deg)'}"><path :d="shapes[t.k]" fill="none" stroke="#5b4a50" stroke-width="6" stroke-linecap="round"/></svg>
+    <div class="ghead"><h3 class="grad">Link Up</h3><span class="lvl">Level {{level}}</span></div>
+    <p class="rule">Rotate tiles to bring the link up from the edge router on the left to the cloud on the right.</p>
+    <div class="hud"><span>Moves <b>{{moves}}</b></span><span>Par <b>{{par}}</b></span><span>Time <b>{{secs}}s</b></span><span>Hints <b>{{hints}}</b></span></div>
+    <div class="board" :class="{won:win}" :style="{gridTemplateColumns:'repeat('+n+',1fr)'}">
+      <button v-for="(t,i) in tiles" :key="i" type="button" class="tile" :class="{lit:lit.has(i),src:i===src,dst:i===dst,hinted:hinted===i}" :aria-label="'Tile row '+(Math.floor(i/n)+1)+' column '+(i%n+1)" @click="rot(i)" @contextmenu.prevent="rot(i,-1)">
+        <svg viewBox="0 0 40 40" :style="{transform:'rotate('+t.r*90+'deg)'}"><path :d="shapes[t.k]" fill="none" stroke="#5b4a50" stroke-width="6" stroke-linecap="round"/><circle v-if="t.k!=='I'" cx="20" cy="20" r="4" fill="#5b4a50"/></svg>
+        <span v-if="i===src" class="cap">EDGE</span><span v-if="i===dst" class="cap">☁</span>
       </button></div>
-    <p class="done" aria-live="polite">{{win?'Link up. Next level loading.':''}}</p>
+    <p class="done" aria-live="polite">{{win ? 'Link up in '+moves+' moves · '+'★'.repeat(stars)+'☆'.repeat(3-stars) : 'Right-click rotates backwards.'}}</p>
+    <div class="gctl">
+      <button class="btn hot" type="button" v-if="win" @click="next">Next level</button>
+      <button class="btn line" type="button" :disabled="win" @click="hint">Hint</button>
+      <button class="btn line" type="button" @click="reset">Reset level</button>
+      <button class="btn line" type="button" @click="newGame">New game</button>
+    </div>
   </div>`,
-  data(){return{n:5,level:1,moves:0,tiles:[],src:0,dst:0,win:false,shapes:{I:'M20 0V40',L:'M20 0V20H40',T:'M0 20H40M20 20V40',X:'M20 0V40M0 20H40'}}},
-  computed:{lit(){return this.flow()}},
+  data(){return{n:4,level:1,moves:0,tiles:[],start:[],sol:[],path:[],src:0,dst:0,win:false,hints:0,hinted:-1,secs:0,timer:null,shapes:{I:'M20 0V40',L:'M20 0V20H40',T:'M0 20H40M20 20V40',X:'M20 0V40M0 20H40'}}},
+  computed:{lit(){return this.flow()},par(){return this.sol.reduce((a,r,i)=>a+(r<0?0:(r-this.start[i]+4)%4),0)},stars(){return this.hints?1:this.moves<=this.par+2?3:this.moves<=this.par*2?2:1}},
   methods:{
-    conns(t){const base={I:[0,2],L:[0,1],T:[1,2,3],X:[0,1,2,3]}[t.k];return base.map(d=>(d+t.r)%4)},
-    make(){const n=this.n; this.win=false; this.moves=0;
+    base(k){return {I:[0,2],L:[0,1],T:[1,2,3],X:[0,1,2,3]}[k]},
+    conns(t){return this.base(t.k).map(d=>(d+t.r)%4)},
+    make(){const n=this.n; this.win=false; this.moves=0; this.hints=0; this.hinted=-1; this.secs=0;
       const sr=Math.floor(Math.random()*n), dr=Math.floor(Math.random()*n); this.src=sr*n; this.dst=dr*n+n-1;
-      // random monotone-ish path from left to right
-      let r=sr,c=0; const path=[[r,c]];
-      while(c<n-1){ const opts=[]; opts.push([r,c+1]); if(r>0)opts.push([r-1,c]); if(r<n-1)opts.push([r+1,c]);
-        let nx=opts[Math.floor(Math.random()*opts.length)]; if(path.some(p=>p[0]===nx[0]&&p[1]===nx[1])) nx=[r,c+1]; [r,c]=nx; path.push([r,c]); }
+      let r=sr,c=0; const path=[[r,c]], seen=new Set([r*n]);
+      while(c<n-1){ const opts=[[r,c+1]]; if(r>0&&!seen.has((r-1)*n+c))opts.push([r-1,c]); if(r<n-1&&!seen.has((r+1)*n+c))opts.push([r+1,c]);
+        [r,c]=opts[Math.floor(Math.random()*opts.length)]; seen.add(r*n+c); path.push([r,c]); }
       while(r!==dr){ r+= dr>r?1:-1; path.push([r,c]); }
-      const need=Array(n*n).fill(null).map(()=>new Set());
-      need[this.src].add(3); need[this.dst].add(1);
+      const need=Array(n*n).fill(null).map(()=>new Set()); need[this.src].add(3); need[this.dst].add(1);
       for(let i=1;i<path.length;i++){const[a,b]=path[i-1],[x,y]=path[i];const A=a*n+b,B=x*n+y;
         if(x<a){need[A].add(0);need[B].add(2);} if(x>a){need[A].add(2);need[B].add(0);} if(y>b){need[A].add(1);need[B].add(3);} if(y<b){need[A].add(3);need[B].add(1);}}
-      const pickShape=s=>{const k=[...s].sort();if(k.length>=3)return k.length===4?'X':'T';if(k.length===2){const[a,b]=k;return (b-a)===2?'I':'L';}return Math.random()<.5?'I':'L';};
-      this.tiles=need.map(s=>({k:s.size?pickShape(s):['I','L','L','T'][Math.floor(Math.random()*4)],r:Math.floor(Math.random()*4)}));
+      const shapeFor=st=>{const k=[...st].sort();if(k.length>=4)return'X';if(k.length===3)return'T';const[a,b]=k;return (b-a)===2?'I':'L';};
+      this.path=path.map(([a,b])=>a*n+b);
+      const tiles=need.map(st=>({k:st.size?shapeFor(st):['I','L','L','T'][Math.floor(Math.random()*4)],r:0}));
+      this.sol=tiles.map((t,i)=>{ if(!need[i].size) return -1; for(let q=0;q<4;q++){ const cs=this.base(t.k).map(d=>(d+q)%4); if([...need[i]].every(d=>cs.includes(d))) return q; } return 0; });
+      tiles.forEach((t,i)=>{ t.r=Math.floor(Math.random()*4); if(this.sol[i]>=0&&t.r===this.sol[i]&&t.k!=='X') t.r=(t.r+1+Math.floor(Math.random()*2))%4; });
+      this.tiles=tiles; this.start=tiles.map(t=>t.r); clearInterval(this.timer); this.timer=setInterval(()=>{ if(!this.win) this.secs++; },1000);
     },
-    flow(){const n=this.n,seen=new Set();const q=[this.src];const t=this.tiles;if(!t.length)return seen;
-      if(!this.conns(t[this.src]).includes(3))return seen; seen.add(this.src);
+    flow(){const n=this.n,seen=new Set(),t=this.tiles;if(!t.length||!this.conns(t[this.src]).includes(3))return seen;const q=[this.src];seen.add(this.src);
       while(q.length){const i=q.shift();const r=Math.floor(i/n),c=i%n;for(const d of this.conns(t[i])){const nr=r+[-1,0,1,0][d],nc=c+[0,1,0,-1][d];if(nr<0||nc<0||nr>=n||nc>=n)continue;const j=nr*n+nc;if(seen.has(j))continue;if(this.conns(t[j]).includes((d+2)%4)){seen.add(j);q.push(j);}}}
       return seen;},
-    rot(i){if(this.win)return;this.tiles[i].r=(this.tiles[i].r+1)%4;this.moves++;const f=this.flow();
-      if(f.has(this.dst)&&this.conns(this.tiles[this.dst]).includes(1)){this.win=true;setTimeout(()=>{this.level++;if(this.level%2===1&&this.n<8)this.n++;this.make();},1300);}}
+    check(){ if(this.flow().has(this.dst)&&this.conns(this.tiles[this.dst]).includes(1)){ this.win=true; clearInterval(this.timer); } },
+    rot(i,dir=1){ if(this.win) return; this.tiles[i].r=(this.tiles[i].r+(dir>0?1:3))%4; this.moves++; this.hinted=-1; this.check(); },
+    hint(){ if(this.win) return; const i=this.path.find(k=>this.sol[k]>=0&&![...this.needOf(k)].every(d=>this.conns(this.tiles[k]).includes(d)));
+      if(i===undefined) return; this.tiles[i].r=this.sol[i]; this.hints++; this.hinted=i; this.check(); },
+    needOf(i){ const n=this.n, k=this.path.indexOf(i), st=new Set(); const dirTo=(a,b)=>{const ra=Math.floor(a/n),ca=a%n,rb=Math.floor(b/n),cb=b%n;return rb<ra?0:cb>ca?1:rb>ra?2:3;};
+      if(k===0) st.add(3); if(k===this.path.length-1) st.add(1); if(k>0) st.add(dirTo(i,this.path[k-1])); if(k<this.path.length-1) st.add(dirTo(i,this.path[k+1])); return st; },
+    reset(){ this.tiles.forEach((t,i)=>t.r=this.start[i]); this.moves=0; this.hints=0; this.hinted=-1; this.win=false; this.secs=0; clearInterval(this.timer); this.timer=setInterval(()=>{ if(!this.win) this.secs++; },1000); },
+    next(){ this.level++; if(this.n<7&&this.level%2===0) this.n++; this.make(); },
+    newGame(){ this.level=1; this.n=4; this.make(); }
   },
-  created(){this.make()}
+  created(){this.make()},
+  unmounted(){clearInterval(this.timer)}
 };
 const Play = {
   components:{Subnet,LinkUp},
   template:`<div class="wrap page"><span class="kicker"><i></i>Two quick games</span><h1 class="title" data-scr>Play</h1>
-    <p class="sub">A break between reading. Both are built from everyday network work.</p>
+    <p class="sub">Built from everyday network work. Scores stay in your browser.</p>
     <div class="games"><Subnet/><LinkUp/></div></div>`
 };
 
