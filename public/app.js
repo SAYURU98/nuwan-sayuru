@@ -227,14 +227,14 @@ const langColor = l => ({'JavaScript':'#e8b86b','Python':'#cfcac2','Jupyter Note
 
 const Nav = {
   props:['route'],
-  template:`<header class="top"><div class="wrap">
+  template:`<div class="scrim" v-if="$root.s.menu" @click="$root.s.menu=false"></div><header class="top"><div class="wrap">
     <a class="logo" href="#home" @click="$root.go('home',$event)"><b>NS</b>NUWAN SAYURU</a>
-    <nav class="links glass" :class="{open:$root.s.menu}" aria-label="Pages">
+    <nav class="links glass" id="sitenav" :class="{open:$root.s.menu}" aria-label="Pages">
       <a v-for="r in items" :key="r[0]" :href="'#'+r[0]" :class="{on:route===r[0]}" :aria-current="route===r[0]?'page':null" @click="$root.go(r[0],$event)">{{r[1]}}</a>
     </nav>
     <div style="display:flex;gap:8px;align-items:center">
       <a class="cvbtn" href="#contact" @click="$root.go('contact',$event,'cv')">Get CV</a>
-      <button class="menu" type="button" :aria-expanded="$root.s.menu" @click="$root.s.menu=!$root.s.menu">Menu</button>
+      <button class="menu" type="button" :aria-expanded="$root.s.menu" aria-controls="sitenav" @click="$root.s.menu=!$root.s.menu"><span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>{{$root.s.menu?'Close':'Menu'}}</button>
     </div></div></header>`,
   data(){return{items:[['home','Home'],['work','Work'],['code','Code'],['play','Play'],['endorse','Endorse'],['contact','Contact']]}}
 };
@@ -634,7 +634,7 @@ const App = {
       nextTick(()=>{ document.querySelectorAll('[data-scr]').forEach(scramble); reveals(); countUp(); if(anchor){ const el=document.getElementById(anchor); el&&el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'}); } }); }
   },
   mounted(){ const h=(location.hash||'').slice(1); if(h&&(ROUTES[h]||h==='admin')){ state.route=h; Field.to(ROUTES[h]||'sphere'); } this.after();
-    addEventListener('keydown',e=>{ if((e.key==='~'||e.key==='`')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){ e.preventDefault(); state.term=!state.term; }});
+    addEventListener('keydown',e=>{ if(e.key==='Escape') state.menu=false; if((e.key==='~'||e.key==='`')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){ e.preventDefault(); state.term=!state.term; }});
     addEventListener('hashchange',()=>{const h=location.hash.slice(1); if(h&&h!==state.route&&(ROUTES[h]||h==='admin')) this.go(h);});
   }
 };
