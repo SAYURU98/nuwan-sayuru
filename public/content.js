@@ -1,7 +1,7 @@
 
 /* ===== Site configuration ===== */
 window.SITE = Object.assign({
-  web3formsKey: "",            // free key from web3forms.com: delivers contact-form mail to your inbox
+  web3formsKey: "6a689e70-1d05-4178-a6da-f70e0795667d",            // free key from web3forms.com: delivers contact-form mail to your inbox
   whatsapp: "94767450014",
   email: "nuwan.sayuru19@gmail.com",
   phone: "+94 76 745 0014",
