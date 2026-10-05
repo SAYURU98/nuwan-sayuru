@@ -1,0 +1,12 @@
+name = "nuwan-sayuru"
+pages_build_output_dir = "./public"
+compatibility_date = "2026-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "nuwan-portfolio-db"
+database_id = "80c68e27-acee-44bb-9306-e1530a8f529b"
+
+[[kv_namespaces]]
+binding = "FILES"
+id = "a91330f3df0f4aab88c5f12f654b12bc"
