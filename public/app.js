@@ -261,9 +261,13 @@ const Home = {
     <div class="wrap">
       <div class="hudline" aria-hidden="true"><span>Datacom · Security · Data centre · Storage · GPON · Video</span><span>06.93° N · 79.86° E · Colombo</span></div>
       <h1 class="name" aria-label="Nuwan Sayuru" id="heroName"><span class="row" v-for="(w,wi) in ['NUWAN','SAYURU']" :key="w" :class="'r'+wi" aria-hidden="true"><span class="l" v-for="(ch,ci) in w" :key="ci" :data-c="ch" :style="{'--d':(0.25+(wi*5+ci)*0.07).toFixed(3)+'s'}"><b class="f">{{ch}}</b></span></span><i class="signal" aria-hidden="true"></i></h1>
-      <div class="hero-foot">
+      <div class="hero-foot" :class="{pic:c.photo&&c.photo.url}">
+        <figure class="portrait" v-if="c.photo&&c.photo.url">
+          <div class="pf"><img :src="c.photo.url" :srcset="c.photo.srcset||null" sizes="(max-width:860px) 150px, 250px" width="480" height="600" alt="Nuwan Sayuru" decoding="async" fetchpriority="high"><i class="k k1"></i><i class="k k2"></i><i class="k k3"></i><i class="k k4"></i><i class="sweep"></i></div>
+          <figcaption><b>Nuwan Sayuru</b><span>Colombo · Sri Lanka</span><a :href="$root.S.linkedin" target="_blank" rel="noopener">LinkedIn ↗</a></figcaption>
+        </figure>
         <p class="lead">{{c.role}}. <b class="shimmer">{{c.intro}}</b></p>
-        <div>
+        <div class="cta">
           <div class="avail" aria-label="Availability">
             <span v-for="h in c.hud" :key="h.t"><i :style="{background:h.c,boxShadow:'0 0 10px '+h.c}"></i>{{h.t}}</span>
           </div>

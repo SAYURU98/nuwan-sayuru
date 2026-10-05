@@ -8,6 +8,12 @@
 <meta property="og:title" content="Nuwan Sayuru">
 <meta property="og:description" content="Implementation, POCs and support across data centre, storage, SD-WAN, campus networks and GPON.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://nuwan-sayuru.pages.dev/">
+<meta property="og:image" content="https://nuwan-sayuru.pages.dev/img/og.jpg">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Nuwan Sayuru, Field Services Engineer">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preload" as="image" href="/img/nuwan-480.webp" type="image/webp">
 <meta name="theme-color" content="#07090c">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%232ec4b6'/%3E%3Cstop offset='1' stop-color='%23e8b86b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='42' font-family='Arial Black,Arial' font-weight='900' font-size='26' text-anchor='middle'%3ENS%3C/text%3E%3C/svg%3E">
 <title>Nuwan Sayuru</title>
@@ -327,6 +333,32 @@ body::after{content:"";position:fixed;inset:0;z-index:80;pointer-events:none;opa
 .hero-foot .avail{flex-direction:column;align-items:flex-start;margin-top:0}
 .hero-foot .row{margin-top:20px}
 @media (max-width:860px){.hero-foot{grid-template-columns:1fr;gap:20px}}
+/* portrait */
+.hero-foot.pic{max-width:none;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr) clamp(190px,17vw,250px);grid-template-areas:"lead cta pic"}
+.hero-foot.pic .lead{grid-area:lead}.hero-foot.pic .cta{grid-area:cta}.hero-foot.pic .portrait{grid-area:pic}
+.portrait{margin:0;align-self:end}
+.portrait .pf{position:relative;aspect-ratio:4/5;border-radius:20px;padding:1px;background:linear-gradient(150deg,rgba(46,196,182,.75),rgba(30,37,46,.6) 40%,rgba(232,184,107,.7));box-shadow:0 30px 70px -28px rgba(46,196,182,.45),0 0 0 1px rgba(0,0,0,.4)}
+.portrait img{animation:pin 1.1s cubic-bezier(.2,.8,.2,1) .5s both;display:block;width:100%;height:100%;object-fit:cover;object-position:50% 18%;border-radius:19px;filter:saturate(.96) contrast(1.03)}
+.portrait .pf::after{content:"";position:absolute;inset:1px;border-radius:19px;background:linear-gradient(180deg,transparent 62%,rgba(7,9,12,.55));pointer-events:none}
+.portrait .k{position:absolute;width:14px;height:14px;border:1.5px solid var(--gold);opacity:.85;z-index:2}
+.portrait .k1{top:-6px;left:-6px;border-right:0;border-bottom:0}.portrait .k2{top:-6px;right:-6px;border-left:0;border-bottom:0;border-color:var(--magenta)}
+.portrait .k3{bottom:-6px;left:-6px;border-right:0;border-top:0;border-color:var(--magenta)}.portrait .k4{bottom:-6px;right:-6px;border-left:0;border-top:0}
+.portrait .sweep{position:absolute;inset:1px;border-radius:19px;overflow:hidden;pointer-events:none;z-index:1}
+.portrait .sweep::before{content:"";position:absolute;left:0;right:0;top:-30%;height:30%;background:linear-gradient(180deg,transparent,rgba(46,196,182,.16),transparent);animation:swp 1.6s ease-out 1.1s both}
+.portrait figcaption{display:grid;gap:2px;margin-top:14px;font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.portrait figcaption b{color:var(--text);font-weight:600;font-size:12px}
+.portrait figcaption a{color:var(--magenta);text-decoration:none;width:max-content}.portrait figcaption a:hover{color:var(--gold)}
+@keyframes pin{from{opacity:0;clip-path:inset(100% 0 0 0 round 20px)}to{opacity:1;clip-path:inset(0 0 0 0 round 20px)}}
+@keyframes swp{from{transform:translateY(0)}to{transform:translateY(440%)}}
+@media (prefers-reduced-motion:reduce){.portrait img,.portrait .sweep::before{animation:none}}
+@media (max-width:1100px) and (min-width:861px){.hero-foot.pic{grid-template-columns:minmax(0,1fr) 210px;grid-template-areas:"lead pic" "cta pic"}}
+@media (max-width:860px){
+  .hero-foot.pic{grid-template-columns:1fr;grid-template-areas:"pic" "lead" "cta"}
+  .portrait{display:flex;align-items:center;gap:18px;align-self:start}
+  .portrait .pf{width:132px;flex:none;border-radius:16px}
+  .portrait img,.portrait .pf::after,.portrait .sweep{border-radius:15px}
+  .portrait figcaption{margin-top:0}
+}
 .lead{font-size:clamp(18px,1.7vw,22px);font-weight:500;line-height:1.45;max-width:40ch;margin-top:22px;color:var(--text)}
 .lead b{font-weight:600}
 .avail{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
@@ -398,7 +430,7 @@ body::after{content:"";position:fixed;inset:0;z-index:80;pointer-events:none;opa
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Nuwan Sayuru","jobTitle":"Field Services Engineer","worksFor":{"@type":"Organization","name":"Huawei Technologies Lanka"},"address":{"@type":"PostalAddress","addressLocality":"Colombo","addressCountry":"LK"},"url":"https://nuwan-sayuru.pages.dev/","sameAs":["https://www.linkedin.com/in/nuwan-sayuru-86907720a","https://github.com/SAYURU98"],"alumniOf":"Sri Lanka Institute of Information Technology"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","image":"https://nuwan-sayuru.pages.dev/img/nuwan-800.webp","name":"Nuwan Sayuru","jobTitle":"Field Services Engineer","worksFor":{"@type":"Organization","name":"Huawei Technologies Lanka"},"address":{"@type":"PostalAddress","addressLocality":"Colombo","addressCountry":"LK"},"url":"https://nuwan-sayuru.pages.dev/","sameAs":["https://www.linkedin.com/in/nuwan-sayuru-86907720a","https://github.com/SAYURU98"],"alumniOf":"Sri Lanka Institute of Information Technology"}</script>
 <link rel="canonical" href="https://nuwan-sayuru.pages.dev/">
 </head>
 <body>

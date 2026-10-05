@@ -25,7 +25,7 @@ window.CONTENT_DEFAULT = {
     {t:"Consulting and freelance", c:"linear-gradient(90deg,#2ec4b6,transparent)", d:"Solution design reviews, implementation support, proofs of concept and troubleshooting on enterprise network, storage and data centre platforms.", cta:"Ask about a project", kind:"Consultation"},
     {t:"Security services", c:"linear-gradient(90deg,#c8734a,transparent)", tag:"On request", d:"Network security reviews, firewall and access-control hardening, and vulnerability assessments, drawing on my cyber security degree.", cta:"Start a conversation", kind:"Consultation"}
   ],
-  photo: {url:"", updated:""},
+  photo: {url:"/img/nuwan-480.webp", srcset:"/img/nuwan-480.webp 480w, /img/nuwan-800.webp 800w", updated:"5 October 2026"},
   cv: {url:"/cv", updated:"5 October 2026"},
   stats: [
     {v:"106+", l:"proofs of concept"},
