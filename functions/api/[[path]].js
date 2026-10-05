@@ -1,5 +1,8 @@
 // Portfolio API on Cloudflare Pages Functions. Bindings: DB (D1), FILES (KV).
-const J = (d, s = 200, h = {}) => new Response(JSON.stringify(d), { status: s, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', ...h } });
+const SEC = { 'x-content-type-options': 'nosniff', 'x-frame-options': 'DENY', 'referrer-policy': 'no-referrer', 'content-security-policy': "default-src 'none'; frame-ancestors 'none'", 'cross-origin-resource-policy': 'same-origin' };
+const J = (d, s = 200, h = {}) => new Response(JSON.stringify(d), { status: s, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...SEC, ...h } });
+const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/;
+const okLink = v => !v || /^https:\/\/[^\s]{4,190}$/i.test(v);
 const bad = (m, s = 400) => J({ error: m }, s);
 const enc = new TextEncoder();
 const b64 = buf => btoa(String.fromCharCode(...new Uint8Array(buf)));
@@ -37,9 +40,19 @@ export async function onRequest({ request, env, params }) {
   const path = (params.path || []).join('/');
   const m = request.method;
   const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+  // Same-origin only for anything that changes state
+  if (m !== 'GET') {
+    const origin = request.headers.get('origin');
+    if (origin && origin !== new URL(request.url).origin) return bad('Forbidden', 403);
+  }
+  const len = +(request.headers.get('content-length') || 0);
+  const isFile = path.startsWith('admin/file/');
+  if (!isFile && len > 262144) return bad('Request too large.', 413);
   let body = {};
-  if (['POST', 'PUT', 'PATCH'].includes(m) && (request.headers.get('content-type') || '').includes('json')) {
+  if (['POST', 'PUT', 'PATCH'].includes(m) && !isFile) {
+    if (!(request.headers.get('content-type') || '').startsWith('application/json')) return bad('Send JSON.', 415);
     try { body = await request.json(); } catch { return bad('Invalid JSON'); }
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return bad('Invalid JSON');
   }
   try {
     /* ---------- public ---------- */
@@ -51,20 +64,22 @@ export async function onRequest({ request, env, params }) {
     }
     if (path === 'endorsements' && m === 'POST') {
       if (body.website) return J({ ok: true });                       // honeypot
-      const name = clip(body.name, 80), message = clip(body.message, 800);
+      const name = clip(body.name, 80), message = clip(body.message, 800), link = clip(body.link, 200);
       if (!name || message.length < 20) return bad('Add your name and at least a sentence or two.');
+      if (!okLink(link)) return bad('The LinkedIn link must start with https://');
       if (await limited(env, ip, 'endorse', 3, 3600)) return bad('Too many submissions. Try again in an hour.', 429);
       await env.DB.prepare('INSERT INTO endorsements (name,role,company,relation,link,message,ip) VALUES (?,?,?,?,?,?,?)')
-        .bind(name, clip(body.role, 80), clip(body.company, 80), clip(body.relation, 40), clip(body.link, 200), message, ip).run();
+        .bind(name, clip(body.role, 80), clip(body.company, 80), clip(body.relation, 40), link, message, ip).run();
       return J({ ok: true });
     }
     if (path === 'messages' && m === 'POST') {
       if (body.website) return J({ ok: true });
-      const name = clip(body.name, 80), message = clip(body.message, 4000);
+      const name = clip(body.name, 80), message = clip(body.message, 4000), email = clip(body.email, 120);
       if (!name || !message) return bad('Add your name and a message.');
+      if (email && !EMAIL.test(email)) return bad('Check the email address.');
       if (await limited(env, ip, 'message', 6, 3600)) return bad('Too many messages. Try again in an hour.', 429);
       await env.DB.prepare('INSERT INTO messages (kind,name,email,message,ip) VALUES (?,?,?,?,?)')
-        .bind(clip(body.kind, 40), name, clip(body.email, 120), message, ip).run();
+        .bind(clip(body.kind, 40), name, email, message, ip).run();
       return J({ ok: true });
     }
 
@@ -93,7 +108,8 @@ export async function onRequest({ request, env, params }) {
         if (String(body.next || '').length < 12) return bad('Use at least 12 characters.');
         const salt = b64(crypto.getRandomValues(new Uint8Array(16)));
         await env.DB.prepare('UPDATE admin SET salt=?, hash=?, iterations=100000 WHERE id=1').bind(salt, await pbkdf2(body.next, salt, 100000)).run();
-        return J({ ok: true });
+        await env.DB.prepare('DELETE FROM sessions').run();   // sign out everywhere
+        return J({ ok: true, signedOut: true });
       }
       if (what === 'endorsements') {
         if (m === 'GET') { const { results } = await env.DB.prepare('SELECT * FROM endorsements ORDER BY created_at DESC LIMIT 500').all(); return J(results); }
@@ -106,27 +122,29 @@ export async function onRequest({ request, env, params }) {
         if (m === 'DELETE' && id) { await env.DB.prepare('DELETE FROM messages WHERE id=?').bind(id).run(); return J({ ok: true }); }
       }
       if (what === 'content' && m === 'PUT') {
-        if (!body.data || typeof body.data !== 'object') return bad('Send { data: {...} }');
+        if (!body.data || typeof body.data !== 'object' || Array.isArray(body.data)) return bad('Send { data: {...} }');
         await env.DB.prepare("UPDATE site_content SET data=?, updated_at=datetime('now'), updated_by='admin' WHERE id=1").bind(JSON.stringify(body.data)).run();
         return J({ ok: true });
       }
-      if (what === 'file' && m === 'PUT' && ['cv', 'photo'].includes(id)) {
+      if (what === 'file' && m === 'PUT' && id === 'cv') {
         const type = request.headers.get('content-type') || '';
-        const ok = id === 'cv' ? type === 'application/pdf' : /^image\/(jpeg|png|webp)$/.test(type);
-        if (!ok) return bad(id === 'cv' ? 'Upload a PDF.' : 'Upload a JPG, PNG or WebP image.');
+        if (type !== 'application/pdf' || len > 8 * 1024 * 1024) return bad('Upload a PDF of 8 MB or less.');
         const buf = await request.arrayBuffer();
         if (buf.byteLength > 8 * 1024 * 1024) return bad('File is larger than 8 MB.');
+        const head = new TextDecoder().decode(new Uint8Array(buf.slice(0, 5)));
+        if (head !== '%PDF-') return bad('That file is not a valid PDF.');
         const updated = new Date().toISOString();
         await env.FILES.put(id, buf, { metadata: { type, updated } });
         const c = await getContent(env);
         const label = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Colombo' });
-        c.data[id] = { url: `/${id}?v=${Date.now()}`, updated: label };
+        c.data[id] = { url: `/cv?v=${Date.now()}`, updated: label };
         await env.DB.prepare("UPDATE site_content SET data=?, updated_at=datetime('now'), updated_by='admin' WHERE id=1").bind(JSON.stringify(c.data)).run();
         return J({ ok: true, url: c.data[id].url, updated: label });
       }
     }
     return bad('Not found', 404);
   } catch (e) {
-    return bad('Server error: ' + (e && e.message || e), 500);
+    console.error(e);
+    return bad('Something went wrong. Try again shortly.', 500);
   }
 }

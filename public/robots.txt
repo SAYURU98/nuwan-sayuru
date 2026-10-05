@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://nuwan-sayuru.pages.dev/sitemap.xml
